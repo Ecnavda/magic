@@ -9,6 +9,15 @@ edition = "2018"
 [dependencies]
 rocket = "*"
 
+[dependencies.rocket_contrib]
+version = "0.4.2"
+default-features = false
+features = ["tera_templates"]
+
 [dependencies.rusqlite]
 version = "0.21.0"
 features = ["bundled"]
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
