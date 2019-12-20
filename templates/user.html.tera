@@ -1,0 +1,12 @@
+{% extends "layout" %}
+
+{% block main %}
+    <h1>Create User</h1>
+    <form method="POST" action="/receive">
+        *Email: <input type="text" name="email" required/>
+        <br>
+        Name: <input type="text" name="name"/>
+        <br>
+        <input type="submit" value="Submit"/>
+    </form>
+{% endblock main %}

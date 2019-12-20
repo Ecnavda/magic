@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" href="layout.css"/>
+        <title>{% block title %} MTG Inventory App {% endblock title %}</title>
+    </head>
+
+    <body>
+        <header>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/user">User</a>
+                <a href="/input">Input</a>
+                <a href="/database">Database</a>
+            </nav>
+        </header>
+
+        <main>
+            {% block main %}
+                <span>Templates not working if you see this.</span>
+            {% endblock main %}
+        </main>
+
+        <footer>
+            <span>Footer text</span>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,8 @@
+{% extends "index" %}
+
+{% block main %}
+    <h1>Magic the Gathering Inventory App</h1>
+    <section>
+        <span>Create your user first </span><a href="/user">Click Here</a>
+    </section>
+{% endblock main %}

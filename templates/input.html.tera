@@ -1,0 +1,12 @@
+{% extends "layout" %}
+
+{% block main %}
+    <h1>Card Set</h1>
+    <form method="POST" action="/receive">
+        *Card Set: <input type="text" name="name" required/>
+        <br>
+        Release Date: <input type="text" name="release"/>
+        <br>
+        <input type="submit" value="Submit"/>
+    </form>
+{% endblock main %}

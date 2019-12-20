@@ -1,0 +1,6 @@
+{% extends "layout" %}
+
+{% block main %}
+    <h1>DB Operation Results</h1>
+    <span>Results: {{ result }}</span>
+{% endblock main %}
