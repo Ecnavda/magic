@@ -1,4 +1,4 @@
-{% extends "index" %}
+{% extends "layout" %}
 
 {% block main %}
     <h1>Magic the Gathering Inventory App</h1>

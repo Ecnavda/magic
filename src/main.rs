@@ -2,10 +2,10 @@
 #[macro_use] extern crate rocket;
 use rocket::request::{ FromForm, Form };
 use rocket_contrib::templates::Template;
-use rusqlite::{ Connection, Result };
-use rusqlite::NO_PARAMS;
 use serde::{ Serialize, Deserialize };
 use std::collections::HashMap;
+
+mod sql;
 
 #[derive(FromForm)]
 struct CardSet {
@@ -31,7 +31,7 @@ struct Cards {
 fn main() {
     println!("Initializing database...");
 
-    match create_schema() {
+    match sql::create_schema() {
         Ok(_) => println!("Success"),
         Err(e) => eprintln!("Error: {}", e),
     };
@@ -43,7 +43,7 @@ fn start_webserver() -> rocket::Rocket {
     // Fairings (middleware) must be attached to rocket
     // before launching.
     rocket::ignite()
-        .mount("/", routes![index])
+        .mount("/", routes![index, user, receive_user])
         .attach(Template::fairing())
 }
 
@@ -62,62 +62,10 @@ fn user() -> Template {
 
 #[post("/receive", data = "<user>")]
 fn receive_user(user: Form<Users>) -> Template {
+    let context: HashMap<&str, &str> = match sql::sql_insert("users", user.email.as_str()) {
+        Ok(_) => [("result", "Successfully wrote to database.")].iter().cloned().collect(),
+        Err(_) => [("result", "Something went wrong.")].iter().cloned().collect(),
+    };
 
-    let context: HashMap<&str, &str> = [("result", "nothing")].iter().cloned().collect();
     Template::render("receive", &context)
-}
-
-fn create_schema() -> Result<()> {
-    let conn = Connection::open("mtg.db")?;
-
-    // SQLite has foreign keys off by default
-    conn.execute(
-        "PRAGMA foreign_keys = ON",
-        NO_PARAMS,
-    )?;
-
-    // SQLite adds a rowid column as the primary key
-    // by default. Setting email as the primary key
-    // and disabling the rowid column for this table.
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS users (
-            email   TEXT NOT NULL,
-            name    TEXT NOT NULL,
-            PRIMARY KEY(email)
-        ) WITHOUT ROWID",
-        NO_PARAMS,
-    )?;
-
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS card_set (
-            name        TEXT NOT NULL,
-            released    TEXT NOT NULL
-        )",
-        NO_PARAMS,
-    )?;
-
-    // Consider UNIQUE on card_set and card_number
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS cards (
-            card_set    TEXT NOT NULL,
-            card_number INT NOT NULL,
-            name        TEXT NOT NULL,
-            color       TEXT NOT NULL,
-            cmc         INT,
-            FOREIGN KEY(card_set) REFERENCES card_sets(rowid)
-        )",
-        NO_PARAMS,
-    )?;
-
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS inventory (
-            email    TEXT NOT NULL,
-            card    TEXT NOT NULL,
-            FOREIGN KEY(email) REFERENCES users(email),
-            FOREIGN KEY(card) REFERENCES cards(rowid)
-        )",
-        NO_PARAMS,
-    )?;
-
-    Ok(())
 }
