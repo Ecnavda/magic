@@ -3,7 +3,7 @@ use rusqlite::NO_PARAMS;
 use rocket::request::FromForm;
 
 #[derive(FromForm)]
-pub struct CardSet {
+pub struct CardSets {
     pub name: String,
     pub release: Option<String>,
 }
@@ -25,6 +25,12 @@ pub struct Cards {
 
 pub fn create_schema() -> Result<()> {
     let conn = Connection::open("mtg.db")?;
+    // SQLite has only the following types
+    // NULL, INTEGER, REAL, TEXT, and BLOB
+    // 6 types of INT though.
+    // No primitive "date" type but SQLite
+    // includes a date() function to provide
+    // a date/time stamp.
 
     // SQLite has foreign keys off by default
     conn.execute(
@@ -45,9 +51,9 @@ pub fn create_schema() -> Result<()> {
     )?;
 
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS card_set (
+        "CREATE TABLE IF NOT EXISTS card_sets (
             name        TEXT NOT NULL,
-            released    TEXT NOT NULL
+            release    TEXT NOT NULL
         )",
         NO_PARAMS,
     )?;
@@ -81,24 +87,24 @@ pub fn create_schema() -> Result<()> {
 // Consider accepting array for values
 pub fn sql_insert(table: &str, name: &str) -> Result<()> {
     let conn = Connection::open("mtg.db")?;
-
+    /*
     let mut stmt = conn.prepare(
         "INSERT INTO users (email) VALUES ('ecnavda@gmail.com')"
     )?;
-    //stmt.execute(&[])?;
-    
+    stmt.execute(&[])?;
+    */
     Ok(())
 }
 
-pub fn insert_user(user: Users) -> Result<()> {
+pub fn insert_user(user: &Users) -> Result<()> {
     let conn = Connection::open("mtg.db")?;
-    let stmt1 = conn.prepare(
+    let mut stmt1 = conn.prepare(
         "INSERT INTO users (email) VALUES (?)"
     )?;
-    let stmt2 = conn.prepare(
+    let mut stmt2 = conn.prepare(
         "INSERT INTO users (email, name) VALUES (?1, ?2)"
     )?;
-    match user.name {
+    match &user.name {
         Some(x) => {
             stmt2.execute(&[user.email.as_str(), x.as_str()])?
         },
@@ -107,4 +113,41 @@ pub fn insert_user(user: Users) -> Result<()> {
         },
     };
     Ok(())
+}
+
+pub fn insert_card_set(card_set: &CardSets) -> Result<()> {
+    let conn = Connection::open("mtg.db")?;
+
+    let mut stmt1 = conn.prepare(
+        "INSERT INTO card_sets (name) VALUES (?)"
+    )?;
+    let mut stmt2 = conn.prepare(
+        "INSERT INTO card_sets (name, release) VALUES (?1, ?2)"
+    )?;
+
+    match &card_set.release {
+        Some(x) => {
+            println!("Entered stmt2 block");
+            stmt2.execute(&[card_set.name.as_str(), x.as_str()])?
+        },
+        None => {
+            stmt1.execute(&[card_set.name.as_str()])?
+        },
+    };
+
+    Ok(())
+}
+
+pub fn select_card_sets() -> Result<Vec<String>> {
+    let conn = Connection::open("mtg.db")?;
+    let mut stmt = conn.prepare(
+        "SELECT name FROM card_sets"
+    )?;
+    let mut rows = stmt.query(NO_PARAMS)?;
+
+    let mut names = Vec::new();
+    while let Some(row) = rows.next()? {
+        names.push(row.get(0)?);
+    }
+    Ok(names)
 }

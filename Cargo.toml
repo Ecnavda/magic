@@ -12,7 +12,7 @@ rocket = "0.4.2"
 [dependencies.rocket_contrib]
 version = "0.4.2"
 default-features = false
-features = ["tera_templates"]
+features = ["tera_templates", "serve"]
 
 [dependencies.rusqlite]
 version = "0.21.0"

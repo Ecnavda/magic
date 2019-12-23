@@ -1,0 +1,18 @@
+html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: auto 50px;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+}
+
+nav a {
+    margin: auto 40px;
+}

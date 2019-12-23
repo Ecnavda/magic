@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta charset="utf-8"/>
-        <link rel="stylesheet" href="layout.css"/>
+        <link rel="stylesheet" href="/assets/layout.css"/>
         <title>{% block title %} MTG Inventory App {% endblock title %}</title>
     </head>
 
