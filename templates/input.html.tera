@@ -2,10 +2,35 @@
 
 {% block main %}
     <h1>Card Set</h1>
-    <form method="POST" action="/receive_user">
+    <form method="POST" action="/receive_card_set">
         *Card Set: <input type="text" name="name" required/>
         <br>
         Release Date: <input type="text" name="release"/>
+        <br>
+        <input type="submit" value="Submit"/>
+    </form>
+    <br>
+    <form method="POST" action="/receive_card">
+        *Card Set: <select name="card_set">
+                        {% for x in card_sets%}
+                            <option value="{{ x }}">{{ x }}</option>
+                        {% endfor %}
+                    </select>
+        <br>
+        *Card Number: <input type="number" name="card_number" required/>
+        <br>
+        *Name: <input type="text" name="name" required/>
+        <br>
+        *Color: <div>
+                    Red <input type="checkbox" name="color" value="red"/>
+                    Blue <input type="checkbox" name="color" value="blue"/>
+                    Black <input type="checkbox" name="color" value="black"/>
+                    Green <input type="checkbox" name="color" vallue="green"/>
+                    White <input type="checkbox" name="color" value="white"/>
+                    Colorless <input type="checkbox" name="color" value="colorless"/>
+                </div>
+        <br>
+        Converted Mana Cost: <input type="number" name="cmc"/>
         <br>
         <input type="submit" value="Submit"/>
     </form>
