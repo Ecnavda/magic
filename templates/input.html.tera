@@ -2,7 +2,7 @@
 
 {% block main %}
     <h1>Card Set</h1>
-    <form method="POST" action="/receive">
+    <form method="POST" action="/receive_user">
         *Card Set: <input type="text" name="name" required/>
         <br>
         Release Date: <input type="text" name="release"/>

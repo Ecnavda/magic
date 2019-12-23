@@ -2,7 +2,7 @@
 
 {% block main %}
     <h1>Create User</h1>
-    <form method="POST" action="/receive">
+    <form method="POST" action="/receive_user">
         *Email: <input type="text" name="email" required/>
         <br>
         Name: <input type="text" name="name"/>

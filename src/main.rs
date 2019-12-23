@@ -7,26 +7,6 @@ use std::collections::HashMap;
 
 mod sql;
 
-#[derive(FromForm)]
-struct CardSet {
-    name: String,
-    release: String,
-}
-
-#[derive(FromForm)]
-struct Users {
-    email: String,
-    name: String,
-}
-
-#[derive(FromForm)]
-struct Cards {
-    card_set: String,
-    card_number: i32,
-    name: String,
-    color: String,
-    cmc: i32,
-}
 
 fn main() {
     println!("Initializing database...");
@@ -50,6 +30,7 @@ fn start_webserver() -> rocket::Rocket {
 #[get("/")]
 fn index() -> Template {
     // An empty context can be an empty HashMap
+    // or a struct that derives Serialize from serde
     let context: HashMap<&str, &str> = HashMap::new();
     Template::render("index", &context)
 }
@@ -60,8 +41,8 @@ fn user() -> Template {
     Template::render("user", &context)
 }
 
-#[post("/receive", data = "<user>")]
-fn receive_user(user: Form<Users>) -> Template {
+#[post("/receive_user", data = "<user>")]
+fn receive_user(user: Form<sql::Users>) -> Template {
     let context: HashMap<&str, &str> = match sql::sql_insert("users", user.email.as_str()) {
         Ok(_) => [("result", "Successfully wrote to database.")].iter().cloned().collect(),
         Err(_) => [("result", "Something went wrong.")].iter().cloned().collect(),
