@@ -4,28 +4,33 @@
     <h1>Magic the Gathering Inventory App</h1>
     <section>
 
-    {% if users %}
-        <form method="POST" action="/load_profile">
-            <label for="profile">Select your profile: </label>
-            <select id="profile">
-                {% for user in users %}
-                    <option value="{{ user }}">{{ user }}</option>
-                {% endfor %}
-            </select>
-            <br>
-            <input type="submit" value="Load"/>
-        </form>
-    {% endif %}
+    {% if profile %}
+        <h3>Currently loaded profile: {{ profile }}</h3>
+        <a href="/logout"><button>Logout</button></a>
+    {% else %}
+        {% if users %}
+            <form method="POST" action="/set_profile">
+                <label for="profile">Select your profile: </label>
+                <select id="profile" name="profile">
+                    {% for user in users %}
+                        <option value="{{ user }}">{{ user }}</option>
+                    {% endfor %}
+                </select>
+                <br>
+                <input type="submit" value="Load"/>
+            </form>
 
-        <form method="POST" action="/receive_user">
-            <label for="email">*Email address: </label>
-            <input id="email" type="text" name="email" required/>
-            <br>
-            <label for="name">Name: </label>
-            <input id="name" type="text" name="name"/>
-            <br>
-            <input type="submit" value="Create Profile"/>
-        </form>
+            <form method="POST" action="/receive_user">
+                <label for="email">*Email address: </label>
+                <input id="email" type="text" name="email" required/>
+                <br>
+                <label for="name">Name: </label>
+                <input id="name" type="text" name="name"/>
+                <br>
+                <input type="submit" value="Create Profile"/>
+            </form>
+        {% endif %}
+    {% endif %}
 
     </section>
 {% endblock main %}

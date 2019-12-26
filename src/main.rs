@@ -1,5 +1,6 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 #[macro_use] extern crate rocket;
+use rocket::response::Redirect;
 use rocket::request::{ FromForm, Form };
 use rocket::http::{ Cookie, Cookies };
 use rocket_contrib::templates::Template;
@@ -13,20 +14,30 @@ mod sql;
 struct Info {
     profile: String,
     users: Vec<String>,
+    card_sets: Vec<String>,
+    cards: Vec<String>,
 }
 
 impl Info {
     fn new() -> Self {
-        Info {profile: String::new(), users: Vec::new()}
+        Info {
+            profile: String::new(),
+            users: Vec::new(),
+            card_sets: Vec::new(),
+            cards: Vec::new(),
+        }
     }
 
     fn insert_profile(&mut self, profile: String) {
         self.profile = profile;
     }
 
-    fn insert_users(&mut self, users: Vec<String>) {
 
-    }
+}
+
+#[derive(FromForm)]
+struct Profile {
+    profile: String
 }
 
 fn main() {
@@ -49,6 +60,7 @@ fn start_webserver() -> rocket::Rocket {
             routes![
                 index, input, user, receive_card,
                 receive_card_set, receive_user,
+                set_profile, logout,
                 ]
             )
         // This mount is for serving CSS, images, JS, etc.
@@ -77,26 +89,44 @@ fn index(cookies: Cookies) -> Template {
     Template::render("index", &info)
 }
 
+#[get("/logout")]
+fn logout(mut cookies: Cookies) -> Redirect {
+    cookies.remove(Cookie::named("profile"));
+    Redirect::to("/")
+}
+
+#[get("/database")]
+fn database(cookies: Cookies) -> Template {
+    let mut info = Info::new();
+    if let Some(c) = cookies.get("profile") {
+        info.insert_profile(c.value().to_string());
+    }
+
+    
+    Template::render("index", &info)
+}
+
 #[get("/user")]
 fn user(cookies: Cookies) -> Template {
     let cookie = cookies.get("profile");
-    let mut context: HashMap<&str, &str> = HashMap::new();
+    let mut info = Info::new();
 
     if let Some(c) = cookie {
-        context.insert("profile",c.value());
+        info.insert_profile(c.value().to_string());
     }
 
-    Template::render("user", &context)
+    Template::render("user", &info)
 }
 
 #[get("/input")]
-fn input() -> Template {
+fn input(mut cookies: Cookies) -> Template {
     // Values in Rust are stored in the stack by default
     // Placing things in a Box<T> stores them on the heap
     // instead. The box being a pointer to the value(s)
     // Vec also places values on the heap.
     // The compiler doesn't need the length/capacity of these
     // at compile time.
+    /*
     let context: HashMap<&str, Vec<String>> = match sql::select_card_sets() {
         Ok(names) => {
             [("card_sets", names)].iter().cloned().collect()
@@ -105,8 +135,19 @@ fn input() -> Template {
             [("card_sets", vec![String::from("Not Real 2020")])].iter().cloned().collect()
         }
     };
+    */
+    let cookie = cookies.get("profile");
+    let mut info = Info::new();
+
+    if let Some(c) = cookie {
+        info.insert_profile(c.value().to_string());
+    }
+
+    if let Ok(names) = sql::select_card_sets() {
+        info.card_sets = names;
+    }
     
-    Template::render("input", &context)
+    Template::render("input", &info)
 }
 
 #[post("/receive_user", data = "<user>")]
@@ -136,4 +177,10 @@ fn receive_card_set(card_set: Form<sql::CardSets>) -> Template {
 fn receive_card(card: Form<sql::Cards>) -> Template {
     let context: HashMap<&str, &str> = HashMap::new();
     Template::render("receive", &context)
+}
+
+#[post("/set_profile", data = "<profile>")]
+fn set_profile(profile: Form<Profile>, mut cookies: Cookies) -> Redirect {
+    cookies.add(Cookie::new("profile", profile.profile.clone()));
+    Redirect::to("/")
 }

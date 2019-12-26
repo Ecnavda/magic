@@ -1,0 +1,9 @@
+{% extends "layout" %}
+
+{% block main %}
+    {% if cards %}
+    
+    {% else %}
+        <span>Card inventory belonging to the logged in profile goes here.</span>
+    {% endif %}
+{% endblock main %}
