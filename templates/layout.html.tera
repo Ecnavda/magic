@@ -11,9 +11,11 @@
         <header>
             <nav>
                 <a href="/">Home</a>
+                {% if profile %}
                 <a href="/user">User</a>
                 <a href="/input">Input</a>
                 <a href="/database">Database</a>
+                {% endif %}
             </nav>
         </header>
 
