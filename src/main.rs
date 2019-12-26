@@ -1,6 +1,7 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 #[macro_use] extern crate rocket;
 use rocket::request::{ FromForm, Form };
+use rocket::http::{ Cookie, Cookies };
 use rocket_contrib::templates::Template;
 use rocket_contrib::serve::StaticFiles;
 use serde::{ Serialize, Deserialize };
@@ -8,6 +9,25 @@ use std::collections::HashMap;
 
 mod sql;
 
+#[derive(Serialize)]
+struct Info {
+    profile: String,
+    users: Vec<String>,
+}
+
+impl Info {
+    fn new() -> Self {
+        Info {profile: String::new(), users: Vec::new()}
+    }
+
+    fn insert_profile(&mut self, profile: String) {
+        self.profile = profile;
+    }
+
+    fn insert_users(&mut self, users: Vec<String>) {
+
+    }
+}
 
 fn main() {
     println!("Initializing database...");
@@ -38,16 +58,34 @@ fn start_webserver() -> rocket::Rocket {
 }
 
 #[get("/")]
-fn index() -> Template {
+fn index(cookies: Cookies) -> Template {
+    let mut info = Info::new();
+    let cookie = cookies.get("profile");
     // An empty context can be an empty HashMap
     // or a struct that derives Serialize from serde
-    let context: HashMap<&str, &str> = HashMap::new();
-    Template::render("index", &context)
+    // let mut context: HashMap<&str, &str> = HashMap::new();
+    
+    if let Some(c) = cookie {
+        info.insert_profile(c.value().to_string());
+    }
+    
+    match sql::select_users() {
+        Ok(users) => info.users = users,
+        Err(e) => eprintln!("{}", e), 
+    }
+
+    Template::render("index", &info)
 }
 
 #[get("/user")]
-fn user() -> Template {
-    let context: HashMap<&str, &str> = HashMap::new();
+fn user(cookies: Cookies) -> Template {
+    let cookie = cookies.get("profile");
+    let mut context: HashMap<&str, &str> = HashMap::new();
+
+    if let Some(c) = cookie {
+        context.insert("profile",c.value());
+    }
+
     Template::render("user", &context)
 }
 
@@ -87,7 +125,7 @@ fn receive_card_set(card_set: Form<sql::CardSets>) -> Template {
         Ok(_) => [("result", "Card set inserted into database.")].iter().cloned().collect(),
         Err(e) => {
             eprintln!("{}", e);
-            [("result", "Could not isert to database.")].iter().cloned().collect()
+            [("result", "Could not insert to database.")].iter().cloned().collect()
         },
     };
 
