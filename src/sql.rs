@@ -84,6 +84,7 @@ pub fn create_schema() -> Result<()> {
     Ok(())
 }
 
+/*
 // Consider accepting array for values
 pub fn sql_insert(table: &str, name: &str) -> Result<()> {
     let conn = Connection::open("mtg.db")?;
@@ -95,6 +96,7 @@ pub fn sql_insert(table: &str, name: &str) -> Result<()> {
     */
     Ok(())
 }
+*/
 
 pub fn insert_user(user: &Users) -> Result<()> {
     let conn = Connection::open("mtg.db")?;
@@ -150,4 +152,18 @@ pub fn select_card_sets() -> Result<Vec<String>> {
         names.push(row.get(0)?);
     }
     Ok(names)
+}
+
+pub fn select_users() -> Result<Vec<String>> {
+    let conn = Connection::open("mtg.db")?;
+    let mut stmt = conn.prepare(
+        "SELECT email FROM users"
+    )?;
+    let mut rows = stmt.query(NO_PARAMS)?;
+
+    let mut emails = Vec::new();
+    while let Some(row) =rows.next()? {
+        emails.push(row.get(0)?);
+    }
+    Ok(emails)
 }
