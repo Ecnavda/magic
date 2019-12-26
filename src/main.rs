@@ -60,7 +60,7 @@ fn start_webserver() -> rocket::Rocket {
             routes![
                 index, input, user, receive_card,
                 receive_card_set, receive_user,
-                set_profile, logout,
+                set_profile, logout, database,
                 ]
             )
         // This mount is for serving CSS, images, JS, etc.
@@ -103,7 +103,7 @@ fn database(cookies: Cookies) -> Template {
     }
 
     
-    Template::render("index", &info)
+    Template::render("database", &info)
 }
 
 #[get("/user")]
