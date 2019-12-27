@@ -1,2 +1,2 @@
-# magic
+# Magic
 MTG card inventory manager.

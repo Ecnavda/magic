@@ -16,9 +16,13 @@ pub struct Users {
 
 #[derive(FromForm)]
 pub struct Cards {
-    pub card_set: String,
-    pub card_number: i32,
     pub name: String,
+    // Rocket FromFormValue Option<T> always return
+    // successfully if validation succeeds.
+    // Returns None ONLY if the value could not be
+    // validated.
+    pub card_set: i32,
+    pub card_number: i32,
     pub color: String,
     pub cmc: i32,
 }
@@ -61,9 +65,9 @@ pub fn create_schema() -> Result<()> {
     // Consider UNIQUE on card_set and card_number
     conn.execute(
         "CREATE TABLE IF NOT EXISTS cards (
-            card_set    TEXT NOT NULL,
-            card_number INT NOT NULL,
             name        TEXT NOT NULL,
+            card_set    INT NOT NULL,
+            card_number INT NOT NULL,
             color       TEXT NOT NULL,
             cmc         INT,
             FOREIGN KEY(card_set) REFERENCES card_sets(rowid)
@@ -139,17 +143,32 @@ pub fn insert_card_set(card_set: &CardSets) -> Result<()> {
 
     Ok(())
 }
+// TODO - Either use Cards struct or create a new struct
+// to pass values into statement.execute()
+pub fn insert_card(card: &Cards) -> Result<()> {
+    
 
-pub fn select_card_sets() -> Result<Vec<String>> {
     let conn = Connection::open("mtg.db")?;
     let mut stmt = conn.prepare(
-        "SELECT name FROM card_sets"
+        "INSERT INTO cards (name, card_set) VALUES (?1, ?2)"
+    )?;
+    
+    // Statement.execute() takes an iterator
+    
+
+    Ok(())
+}
+
+pub fn select_card_sets() -> Result<Vec<(i32, String)>> {
+    let conn = Connection::open("mtg.db")?;
+    let mut stmt = conn.prepare(
+        "SELECT rowid,name FROM card_sets"
     )?;
     let mut rows = stmt.query(NO_PARAMS)?;
 
     let mut names = Vec::new();
     while let Some(row) = rows.next()? {
-        names.push(row.get(0)?);
+        names.push((row.get(0)?, row.get(1)?));
     }
     Ok(names)
 }

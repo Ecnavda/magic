@@ -14,7 +14,7 @@ mod sql;
 struct Info {
     profile: String,
     users: Vec<String>,
-    card_sets: Vec<String>,
+    card_sets: Vec<(i32, String)>,
     cards: Vec<String>,
 }
 
@@ -142,10 +142,15 @@ fn input(mut cookies: Cookies) -> Template {
     if let Some(c) = cookie {
         info.insert_profile(c.value().to_string());
     }
-
+    /*
     if let Ok(names) = sql::select_card_sets() {
         info.card_sets = names;
     }
+    */
+    match sql::select_card_sets() {
+        Ok(names) => info.card_sets = names,
+        Err(e) => eprintln!("ERROR! -- {}", e),
+    };
     
     Template::render("input", &info)
 }
@@ -175,7 +180,16 @@ fn receive_card_set(card_set: Form<sql::CardSets>) -> Template {
 
 #[post("/receive_card", data = "<card>")]
 fn receive_card(card: Form<sql::Cards>) -> Template {
-    let context: HashMap<&str, &str> = HashMap::new();
+    println!("Value is {}", card.cmc);
+    
+    let context: HashMap<&str, &str> = match sql::insert_card(&card) {
+        Ok(_) => [("result", "Card inserted into database.")].iter().cloned().collect(),
+        Err(e) => {
+            eprintln!("{}", e);
+            [("result", "Could not insert card into database.")].iter().cloned().collect()
+        }
+    };
+
     Template::render("receive", &context)
 }
 
