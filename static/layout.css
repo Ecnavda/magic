@@ -1,11 +1,30 @@
-html {
+html, body {
     margin: 0;
     padding: 0;
 }
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    margin: auto 50px;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 5% auto 5%;
+    grid-template-rows: 50px auto 50px;
+    grid-template-areas: ". header ."
+                         ". main   ."
+                         ". footer .";
+    justify-items: center;
+}
+
+header {
+    grid-area: header;
+}
+
+main {
+    grid-area: main;
+}
+
+footer {
+    grid-area: footer;
 }
 
 nav {
@@ -14,5 +33,9 @@ nav {
 }
 
 nav a {
-    margin: auto 40px;
+    margin: auto 15px;
+}
+
+legend {
+    font-weight: bold;
 }

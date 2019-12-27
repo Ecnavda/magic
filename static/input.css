@@ -1,0 +1,26 @@
+#card_form {
+    width: 600px;
+    margin: auto;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    column-gap: 15px;
+    row-gap: 15px;
+}
+
+.container label {
+    grid-column: 1/2;
+    text-align: right;
+}
+
+.container input, .container select,
+.container div {
+    grid-column: 2/3;
+}
+
+.container button {
+    grid-column: 2/3;
+    margin-top: 15px;
+}

@@ -1,41 +1,65 @@
 {% extends "layout" %}
 
 {% block main %}
-    <h1>Card Set</h1>
-    <form method="POST" action="/receive_card_set">
-        *Card Set: <input type="text" name="name" required/>
-        <br>
-        Release Date: <input type="text" name="release"/>
-        <br>
-        <input type="submit" value="Submit"/>
-    </form>
-    <br>
+    <link rel="stylesheet" href="/assets/input.css"/>
     {% if card_sets %}
-        <form method="POST" action="/receive_card">
-            *Card Set: <select name="card_set">
+        <form id="card_form" method="POST" action="/receive_card">
+            <fieldset>
+                <legend>Card Input</legend>
+                <div class="container">
+                    <label for="card_name">*Card Name: </label>
+                    <input id="card_name" type="text" name="name" required/>
+                    
+                    <label for="card_set">Card Set: </label>
+                    <select id="card_set" name="card_set">
                             {% for x in card_sets%}
                                 <option value="{{ x }}">{{ x }}</option>
                             {% endfor %}
-                        </select>
-            <br>
-            *Card Number: <input type="number" name="card_number" required/>
-            <br>
-            *Name: <input type="text" name="name" required/>
-            <br>
-            *Color: <div>
-                        Red <input type="checkbox" name="color" value="red"/>
-                        Blue <input type="checkbox" name="color" value="blue"/>
-                        Black <input type="checkbox" name="color" value="black"/>
-                        Green <input type="checkbox" name="color" vallue="green"/>
-                        White <input type="checkbox" name="color" value="white"/>
-                        Colorless <input type="checkbox" name="color" value="colorless"/>
-                    </div>
-            <br>
-            Converted Mana Cost: <input type="number" name="cmc"/>
-            <br>
-            <input type="submit" value="Submit"/>
+                    </select>
+                    
+                    <label for="card_number">Card Number: </label>
+                    <input id="card_number" type="number" name="card_number"/>
+                    
+                    <label for="colors">Color: </label>
+                        <div id="colors">
+                            <input id="red" type="checkbox" name="color" value="red"/>
+                            <label for="red">Red </label>
+                            <input id="blue" type="checkbox" name="color" value="blue"/>
+                            <label for="blue">Blue </label>
+                            <input id="black" type="checkbox" name="color" value="black"/>
+                            <label for="black">Black </label>
+                            <br>
+                            <input type="checkbox" name="color" vallue="green"/>
+                            <label for="green">Green </label>
+                            <input id="white" type="checkbox" name="color" value="white"/>
+                            <label for="white">White </label>
+                            <input id="colorless" type="checkbox" name="color" value="colorless"/>
+                            <label for="colorless">Colorless </label>
+                        </div>
+                    
+                    <label for="cmc">Converted Mana Cost: </label>
+                    <input id="cmc" type="number" name="cmc"/>
+                    
+                    <button>Submit</button>
+                <div>
+            </fieldset>
+        </form>
         {% else %}
             <span><strong>Enter a card set before you can enter cards.</strong></span>
         {% endif %}
-    </form>
+        <br>
+        <form method="POST" action="/receive_card_set">
+            <fieldset>
+                <legend>Card Set</legend>
+                <div class="container">
+                    <label for="set_name">*Card Set </label>
+                    <input type="text" name="name" required/>
+                    <br>
+                    <label for="release">Release Date: </label>
+                    <input type="text" name="release"/>
+                    <br>
+                    <input type="submit" value="Submit"/>
+                </div>
+            </fieldset>
+        </form>
 {% endblock main %}
