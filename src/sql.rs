@@ -1,6 +1,8 @@
 use rusqlite::{ Connection, Result };
 use rusqlite::NO_PARAMS;
+use rusqlite::types::Value as SQLValue;
 use rocket::request::FromForm;
+use serde::{ Serialize, Deserialize };
 
 #[derive(FromForm)]
 pub struct CardSets {
@@ -14,18 +16,40 @@ pub struct Users {
     pub name: Option<String>,
 }
 
-#[derive(FromForm)]
+#[derive(FromForm, Debug)]
 pub struct Cards {
     pub name: String,
-    // Rocket FromFormValue Option<T> always return
-    // successfully if validation succeeds.
-    // Returns None ONLY if the value could not be
-    // validated.
-    pub card_set: i32,
-    pub card_number: i32,
-    pub color: String,
-    pub cmc: i32,
+    // Option<T> could be used to detect the presence
+    // of a value received from a form.
+    pub card_set: i64,
+    pub card_number: Option<i64>,
+    pub color: Option<String>,
+    pub cmc: Option<i64>,
 }
+
+impl Cards {
+    fn sql_output(&self) -> Vec<SQLValue> {
+        let mut keys: Vec<SQLValue> = vec![SQLValue::Text(String::from("name")), SQLValue::Text(String::from("card_set"))];
+        let mut values: Vec<SQLValue> = vec![SQLValue::Text(self.name.clone()), SQLValue::Integer(self.card_set)];
+
+        if let Some(num) = self.card_number {
+            keys.push(SQLValue::Text(String::from("card_number")));
+            values.push(SQLValue::Integer(num));
+        }
+        if let Some(color) = self.color.clone() {
+            keys.push(SQLValue::Text(String::from("color")));
+            values.push(SQLValue::Text(color));
+        }
+        if let Some(cmc) = self.cmc {
+            keys.push(SQLValue::Text(String::from("cmc")));
+            values.push(SQLValue::Integer(cmc));
+        }
+
+        keys.append(&mut values);
+        keys
+    }
+}
+
 
 pub fn create_schema() -> Result<()> {
     let conn = Connection::open("mtg.db")?;
@@ -54,10 +78,15 @@ pub fn create_schema() -> Result<()> {
         NO_PARAMS,
     )?;
 
+    // Implicit rowid created by SQLite cannot be used
+    // as a foreign key. Creating 'id' row for that purpose.
+    // INTEGER Primary key gets AUTOINCREMENT by default.
     conn.execute(
         "CREATE TABLE IF NOT EXISTS card_sets (
-            name        TEXT NOT NULL,
-            release    TEXT NOT NULL
+            id         INTEGER NOT NULL, 
+            name       TEXT NOT NULL,
+            release    TEXT NOT NULL,
+            PRIMARY KEY(id)
         )",
         NO_PARAMS,
     )?;
@@ -67,10 +96,10 @@ pub fn create_schema() -> Result<()> {
         "CREATE TABLE IF NOT EXISTS cards (
             name        TEXT NOT NULL,
             card_set    INT NOT NULL,
-            card_number INT NOT NULL,
-            color       TEXT NOT NULL,
+            card_number INT,
+            color       TEXT,
             cmc         INT,
-            FOREIGN KEY(card_set) REFERENCES card_sets(rowid)
+            FOREIGN KEY(card_set) REFERENCES card_sets(id)
         )",
         NO_PARAMS,
     )?;
@@ -146,15 +175,44 @@ pub fn insert_card_set(card_set: &CardSets) -> Result<()> {
 // TODO - Either use Cards struct or create a new struct
 // to pass values into statement.execute()
 pub fn insert_card(card: &Cards) -> Result<()> {
-    
 
+    // This pattern is used to create a Vec that holds one type of multiple types
+    let sqlinput: Vec<SQLValue> = card.sql_output();
+    
     let conn = Connection::open("mtg.db")?;
-    let mut stmt = conn.prepare(
-        "INSERT INTO cards (name, card_set) VALUES (?1, ?2)"
+    println!("Made it before statements");
+    let mut stmt1 = conn.prepare(
+        "INSERT INTO cards (?1, ?2) VALUES (?3, ?4)"
     )?;
-    
-    // Statement.execute() takes an iterator
-    
+    let mut stmt2 = conn.prepare(
+        "INSERT INTO cards (?1, ?2, ?3) VALUES (?4, ?5, ?6)"
+    )?;
+    let mut stmt3 = conn.prepare(
+        "INSERT INTO cards (?1, ?2, ?3, ?4) VALUES (?5, ?6, ?7, ?8)"
+    )?;
+    let mut stmt4 = conn.prepare(
+        "INSERT INTO cards (?1, ?2, ?3, ?4, ?5) VALUES (?6, ?7, ?8, ?9, ?10)"
+    )?;
+    println!("Made it after statements");
+    match sqlinput.len() {
+        4 => {
+            println!("Inside length 4");
+            stmt1.execute(&sqlinput)?;
+        },
+        6 => {
+            println!("Inside length 6");
+            stmt2.execute(&sqlinput)?;
+        },
+        8 => {
+            println!("Inside length 8");
+            stmt3.execute(&sqlinput)?;
+        },
+        10 => {
+            println!("Inside length 10");
+            stmt4.execute(&sqlinput)?;
+        },
+        _ => (),
+        };
 
     Ok(())
 }
