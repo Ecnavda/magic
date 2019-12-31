@@ -180,7 +180,9 @@ pub fn insert_card(card: &Cards) -> Result<()> {
     let sqlinput: Vec<SQLValue> = card.sql_output();
     
     let conn = Connection::open("mtg.db")?;
-    println!("Made it before statements");
+
+    // Connection.prepare() accepts &str, build with column names first
+    // build in Cards struct
     let mut stmt1 = conn.prepare(
         "INSERT INTO cards (?1, ?2) VALUES (?3, ?4)"
     )?;
@@ -196,19 +198,15 @@ pub fn insert_card(card: &Cards) -> Result<()> {
     println!("Made it after statements");
     match sqlinput.len() {
         4 => {
-            println!("Inside length 4");
             stmt1.execute(&sqlinput)?;
         },
         6 => {
-            println!("Inside length 6");
             stmt2.execute(&sqlinput)?;
         },
         8 => {
-            println!("Inside length 8");
             stmt3.execute(&sqlinput)?;
         },
         10 => {
-            println!("Inside length 10");
             stmt4.execute(&sqlinput)?;
         },
         _ => (),
