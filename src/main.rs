@@ -180,7 +180,7 @@ fn receive_card_set(card_set: Form<sql::CardSets>) -> Template {
 
 #[post("/receive_card", data = "<card>")]
 fn receive_card(card: Form<sql::Cards>) -> Template {
-    println!("Value is {}", card.cmc);
+    
     
     let context: HashMap<&str, &str> = match sql::insert_card(&card) {
         Ok(_) => [("result", "Card inserted into database.")].iter().cloned().collect(),
