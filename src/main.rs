@@ -5,7 +5,7 @@ use rocket::request::{ FromForm, Form };
 use rocket::http::{ Cookie, Cookies };
 use rocket_contrib::templates::Template;
 use rocket_contrib::serve::StaticFiles;
-use serde::{ Serialize, Deserialize };
+use serde::Serialize;
 use std::collections::HashMap;
 
 mod sql;
@@ -101,7 +101,9 @@ fn database(cookies: Cookies) -> Template {
     if let Some(c) = cookies.get("profile") {
         info.insert_profile(c.value().to_string());
     }
-
+    if let Ok(cards) = sql::select_cards() {
+        info.cards = cards;
+    }
     
     Template::render("database", &info)
 }
@@ -119,7 +121,7 @@ fn user(cookies: Cookies) -> Template {
 }
 
 #[get("/input")]
-fn input(mut cookies: Cookies) -> Template {
+fn input(cookies: Cookies) -> Template {
     // Values in Rust are stored in the stack by default
     // Placing things in a Box<T> stores them on the heap
     // instead. The box being a pointer to the value(s)

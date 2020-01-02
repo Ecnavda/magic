@@ -2,7 +2,7 @@ use rusqlite::{ Connection, Result };
 use rusqlite::NO_PARAMS;
 use rusqlite::types::Value as SQLValue;
 use rocket::request::FromForm;
-use serde::{ Serialize, Deserialize };
+
 
 #[derive(FromForm)]
 pub struct CardSets {
@@ -28,25 +28,24 @@ pub struct Cards {
 }
 
 impl Cards {
-    fn sql_output(&self) -> Vec<SQLValue> {
-        let mut keys: Vec<SQLValue> = vec![SQLValue::Text(String::from("name")), SQLValue::Text(String::from("card_set"))];
+    fn sql_output(&self) -> (Vec<&str>, Vec<SQLValue>) {
+        let mut keys: Vec<&str> = vec!["name", "card_set"];
         let mut values: Vec<SQLValue> = vec![SQLValue::Text(self.name.clone()), SQLValue::Integer(self.card_set)];
 
         if let Some(num) = self.card_number {
-            keys.push(SQLValue::Text(String::from("card_number")));
+            keys.push("card_number");
             values.push(SQLValue::Integer(num));
         }
         if let Some(color) = self.color.clone() {
-            keys.push(SQLValue::Text(String::from("color")));
+            keys.push("color");
             values.push(SQLValue::Text(color));
         }
         if let Some(cmc) = self.cmc {
-            keys.push(SQLValue::Text(String::from("cmc")));
+            keys.push("cmc");
             values.push(SQLValue::Integer(cmc));
         }
 
-        keys.append(&mut values);
-        keys
+        (keys, values)
     }
 }
 
@@ -177,42 +176,64 @@ pub fn insert_card_set(card_set: &CardSets) -> Result<()> {
 pub fn insert_card(card: &Cards) -> Result<()> {
 
     // This pattern is used to create a Vec that holds one type of multiple types
-    let sqlinput: Vec<SQLValue> = card.sql_output();
+    let (names, values) = card.sql_output();
+    let mut statement = String::from("INSERT INTO cards (");
+    for name in names {
+        statement.push_str(name);
+        statement.push_str(",")
+    }
+    statement.pop();
+    statement.push_str(") ");
     
+    let mut prep1 = statement.clone();
+    prep1.push_str("VALUES (?1, ?2)");
+    let mut prep2 = statement.clone();
+    prep2.push_str("VALUES (?1, ?2, ?3)");
+    let mut prep3 = statement.clone();
+    prep3.push_str("VALUES (?1, ?2, ?3, ?4)");
+    let mut prep4 = statement.clone();
+    prep4.push_str("VALUES (?1, ?2, ?3, ?4, ?5)");
+
     let conn = Connection::open("mtg.db")?;
 
     // Connection.prepare() accepts &str, build with column names first
-    // build in Cards struct
-    let mut stmt1 = conn.prepare(
-        "INSERT INTO cards (?1, ?2) VALUES (?3, ?4)"
-    )?;
-    let mut stmt2 = conn.prepare(
-        "INSERT INTO cards (?1, ?2, ?3) VALUES (?4, ?5, ?6)"
-    )?;
-    let mut stmt3 = conn.prepare(
-        "INSERT INTO cards (?1, ?2, ?3, ?4) VALUES (?5, ?6, ?7, ?8)"
-    )?;
-    let mut stmt4 = conn.prepare(
-        "INSERT INTO cards (?1, ?2, ?3, ?4, ?5) VALUES (?6, ?7, ?8, ?9, ?10)"
-    )?;
-    println!("Made it after statements");
-    match sqlinput.len() {
+    // prepare() also checks for number of fields and values to be the same.
+    match values.len() {
+        2 => {
+            let mut stmt1 = conn.prepare(prep1.as_str())?;
+            stmt1.execute(&values)?;
+        },
+        3 => {
+            let mut stmt2 = conn.prepare(prep2.as_str())?;
+            stmt2.execute(&values)?;
+        },
         4 => {
-            stmt1.execute(&sqlinput)?;
+            let mut stmt3 = conn.prepare(prep3.as_str())?;
+            stmt3.execute(&values)?;
         },
-        6 => {
-            stmt2.execute(&sqlinput)?;
-        },
-        8 => {
-            stmt3.execute(&sqlinput)?;
-        },
-        10 => {
-            stmt4.execute(&sqlinput)?;
+        5 => {
+            let mut stmt4 = conn.prepare(prep4.as_str())?;
+            stmt4.execute(&values)?;
         },
         _ => (),
         };
 
     Ok(())
+}
+
+pub fn select_cards() -> Result<Vec<String>> {
+    let conn = Connection::open("mtg.db")?;
+    let mut stmt = conn.prepare(
+        "SELECT name FROM cards"
+    )?;
+    let mut rows = stmt.query(NO_PARAMS)?;
+
+    let mut names = Vec::new();
+    while let Some(row) = rows.next()? {
+        names.push(row.get(0)?);
+    }
+
+    Ok(names)
 }
 
 pub fn select_card_sets() -> Result<Vec<(i32, String)>> {
