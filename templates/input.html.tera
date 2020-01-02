@@ -8,10 +8,10 @@
                 <legend>Card Input</legend>
                 <div class="container">
                     <label for="card_name">*Card Name: </label>
-                    <input id="card_name" type="text" name="name" required/>
+                    <input id="card_name" type="text" name="name" required autofocus/>
                     
-                    <label for="card_set">Card Set: </label>
-                    <select id="card_set" name="card_set">
+                    <label for="card_set">*Card Set: </label>
+                    <select id="card_set" name="card_set" required>
                             {% for x in card_sets%}
                                 <option value="{{ x.0 }}">{{ x.1 }}</option>
                             {% endfor %}
