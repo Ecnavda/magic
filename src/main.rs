@@ -16,6 +16,7 @@ struct Info {
     users: Vec<String>,
     card_sets: Vec<(i32, String)>,
     cards: Vec<String>,
+    result: String,
 }
 
 impl Info {
@@ -25,6 +26,7 @@ impl Info {
             users: Vec::new(),
             card_sets: Vec::new(),
             cards: Vec::new(),
+            result: String::new(),
         }
     }
 
@@ -158,41 +160,61 @@ fn input(cookies: Cookies) -> Template {
 }
 
 #[post("/receive_user", data = "<user>")]
-fn receive_user(user: Form<sql::Users>) -> Template {
-    let context: HashMap<&str, &str> = match sql::insert_user(&user) {
-        Ok(_) => [("result", "Successfully wrote to database.")].iter().cloned().collect(),
-        Err(_) => [("result", "Something went wrong.")].iter().cloned().collect(),
-    };
+fn receive_user(user: Form<sql::Users>, cookies: Cookies) -> Template {
+    let cookie = cookies.get("profile");
+    let mut info = Info::new();
+    if let Some(c) = cookie {
+        info.insert_profile(c.value().to_string());
+    }
 
-    Template::render("receive", &context)
-}
-
-#[post("/receive_card_set", data = "<card_set>")]
-fn receive_card_set(card_set: Form<sql::CardSets>) -> Template {
-    let context: HashMap<&str, &str> = match sql::insert_card_set(&card_set) {
-        Ok(_) => [("result", "Card set inserted into database.")].iter().cloned().collect(),
+    match sql::insert_user(&user) {
+        Ok(_) => info.result = String::from("Card set inserted into database."),
         Err(e) => {
             eprintln!("{}", e);
-            [("result", "Could not insert to database.")].iter().cloned().collect()
+            info.result = String::from("Could not insert to database.");
         },
     };
 
-    Template::render("receive", &context)
+
+    Template::render("receive", &info)
+}
+
+#[post("/receive_card_set", data = "<card_set>")]
+fn receive_card_set(card_set: Form<sql::CardSets>, cookies: Cookies) -> Template {
+    let cookie = cookies.get("profile");
+    let mut info = Info::new();
+    if let Some(c) = cookie {
+        info.insert_profile(c.value().to_string());
+    }
+
+    match sql::insert_card_set(&card_set) {
+        Ok(_) => info.result = String::from("Card set inserted into database."),
+        Err(e) => {
+            eprintln!("{}", e);
+            info.result = String::from("Could not insert to database.");
+        },
+    };
+
+    Template::render("receive", &info)
 }
 
 #[post("/receive_card", data = "<card>")]
-fn receive_card(card: Form<sql::Cards>) -> Template {
+fn receive_card(card: Form<sql::Cards>, cookies: Cookies) -> Template {
+    let cookie = cookies.get("profile");
+    let mut info = Info::new();
+    if let Some(c) = cookie {
+        info.insert_profile(c.value().to_string());
+    }
     
-    
-    let context: HashMap<&str, &str> = match sql::insert_card(&card) {
-        Ok(_) => [("result", "Card inserted into database.")].iter().cloned().collect(),
+    match sql::insert_card(&card) {
+        Ok(_) => info.result = String::from("Card inserted into database."),
         Err(e) => {
             eprintln!("{}", e);
-            [("result", "Could not insert card into database.")].iter().cloned().collect()
+            info.result = String::from("Could not insert. Error occurred.");
         }
-    };
+    }
 
-    Template::render("receive", &context)
+    Template::render("receive", &info)
 }
 
 #[post("/set_profile", data = "<profile>")]
