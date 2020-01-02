@@ -19,8 +19,9 @@
                 <br>
                 <input type="submit" value="Load"/>
             </form>
+        {% endif %}
 
-            <form method="POST" action="/receive_user">
+        <form method="POST" action="/receive_user">
                 <label for="email">*Email address: </label>
                 <input id="email" type="text" name="email" required/>
                 <br>
@@ -29,7 +30,6 @@
                 <br>
                 <input type="submit" value="Create Profile"/>
             </form>
-        {% endif %}
     {% endif %}
 
     </section>
