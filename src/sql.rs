@@ -23,7 +23,12 @@ pub struct Cards {
     // of a value received from a form.
     pub card_set: i64,
     pub card_number: Option<i64>,
-    pub color: Option<String>,
+    pub red: bool,
+    pub blue: bool,
+    pub black: bool,
+    pub green: bool,
+    pub white: bool,
+    pub colorless: bool,
     pub cmc: Option<i64>,
 }
 
@@ -36,9 +41,29 @@ impl Cards {
             keys.push("card_number");
             values.push(SQLValue::Integer(num));
         }
-        if let Some(color) = self.color.clone() {
+        let mut color_string = String::new();
+        if self.red {
+            color_string.push_str("red,");
+        }
+        if self.blue {
+            color_string.push_str("blue,");
+        }
+        if self.black {
+            color_string.push_str("black,");
+        }
+        if self.green {
+            color_string.push_str("green,");
+        }
+        if self.white {
+            color_string.push_str("white,");
+        }
+        if self.colorless {
+            color_string.push_str("colorless,")
+        }
+        if !(color_string.is_empty()) {
+            color_string.pop();
             keys.push("color");
-            values.push(SQLValue::Text(color));
+            values.push(SQLValue::Text(color_string));
         }
         if let Some(cmc) = self.cmc {
             keys.push("cmc");
@@ -46,6 +71,10 @@ impl Cards {
         }
 
         (keys, values)
+    }
+
+    pub fn color_output(&mut self) {
+        
     }
 }
 
@@ -174,7 +203,7 @@ pub fn insert_card_set(card_set: &CardSets) -> Result<()> {
 // TODO - Either use Cards struct or create a new struct
 // to pass values into statement.execute()
 pub fn insert_card(card: &Cards) -> Result<()> {
-
+    
     // This pattern is used to create a Vec that holds one type of multiple types
     let (names, values) = card.sql_output();
     let mut statement = String::from("INSERT INTO cards (");

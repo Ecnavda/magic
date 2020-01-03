@@ -22,18 +22,18 @@
                     
                     <label for="colors">Color: </label>
                         <div id="colors">
-                            <input id="red" type="checkbox" name="color" value="red"/>
+                            <input id="red" type="checkbox" name="red" value="true"/>
                             <label for="red">Red </label>
-                            <input id="blue" type="checkbox" name="color" value="blue"/>
+                            <input id="blue" type="checkbox" name="blue" value="true"/>
                             <label for="blue">Blue </label>
-                            <input id="black" type="checkbox" name="color" value="black"/>
+                            <input id="black" type="checkbox" name="black" value="true"/>
                             <label for="black">Black </label>
                             <br>
-                            <input type="checkbox" name="color" vallue="green"/>
+                            <input id="green" type="checkbox" name="green" value="true"/>
                             <label for="green">Green </label>
-                            <input id="white" type="checkbox" name="color" value="white"/>
+                            <input id="white" type="checkbox" name="white" value="true"/>
                             <label for="white">White </label>
-                            <input id="colorless" type="checkbox" name="color" value="colorless"/>
+                            <input id="colorless" type="checkbox" name="colorless" value="true"/>
                             <label for="colorless">Colorless </label>
                         </div>
                     
