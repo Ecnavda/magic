@@ -1,11 +1,17 @@
 {% extends "layout" %}
 
 {% block main %}
+    <link rel="stylesheet" href="/assets/database.css"/>
     <span>Currently displaying all cards in the database.</span>
     {% if cards %}
         <ul>
             {% for card in cards %}
-                <li>{{ card }}</li>
+                <li>
+                    {% for color in card.1 %}
+                        <div class="{{ color }}"></div>
+                    {% endfor %}
+                    <span class="{{card.2}}">{{ card.0 }}</span>
+                </li>
             {% endfor %}
         </ul>
     {% else %}

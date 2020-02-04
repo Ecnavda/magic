@@ -23,6 +23,7 @@ pub struct Cards {
     // of a value received from a form.
     pub card_set: i64,
     pub card_number: Option<i64>,
+    pub rarity: String,
     pub red: bool,
     pub blue: bool,
     pub black: bool,
@@ -34,31 +35,32 @@ pub struct Cards {
 
 impl Cards {
     fn sql_output(&self) -> (Vec<&str>, Vec<SQLValue>) {
-        let mut keys: Vec<&str> = vec!["name", "card_set"];
-        let mut values: Vec<SQLValue> = vec![SQLValue::Text(self.name.clone()), SQLValue::Integer(self.card_set)];
+        let mut keys: Vec<&str> = vec!["name", "card_set", "rarity"];
+        let mut values: Vec<SQLValue> = vec![SQLValue::Text(self.name.clone()), SQLValue::Integer(self.card_set), SQLValue::Text(self.rarity.clone())];
 
         if let Some(num) = self.card_number {
             keys.push("card_number");
             values.push(SQLValue::Integer(num));
         }
+
         let mut color_string = String::new();
         if self.red {
-            color_string.push_str("red,");
+            color_string.push_str("red ");
         }
         if self.blue {
-            color_string.push_str("blue,");
+            color_string.push_str("blue ");
         }
         if self.black {
-            color_string.push_str("black,");
+            color_string.push_str("black ");
         }
         if self.green {
-            color_string.push_str("green,");
+            color_string.push_str("green ");
         }
         if self.white {
-            color_string.push_str("white,");
+            color_string.push_str("white ");
         }
         if self.colorless {
-            color_string.push_str("colorless,")
+            color_string.push_str("colorless ")
         }
         if !(color_string.is_empty()) {
             color_string.pop();
@@ -124,6 +126,7 @@ pub fn create_schema() -> Result<()> {
         "CREATE TABLE IF NOT EXISTS cards (
             name        TEXT NOT NULL,
             card_set    INT NOT NULL,
+            rarity      TEXT,
             card_number INT,
             color       TEXT,
             cmc         INT,
@@ -215,32 +218,32 @@ pub fn insert_card(card: &Cards) -> Result<()> {
     statement.push_str(") ");
     
     let mut prep1 = statement.clone();
-    prep1.push_str("VALUES (?1, ?2)");
+    prep1.push_str("VALUES (?1, ?2, ?3)");
     let mut prep2 = statement.clone();
-    prep2.push_str("VALUES (?1, ?2, ?3)");
+    prep2.push_str("VALUES (?1, ?2, ?3, ?4)");
     let mut prep3 = statement.clone();
-    prep3.push_str("VALUES (?1, ?2, ?3, ?4)");
+    prep3.push_str("VALUES (?1, ?2, ?3, ?4, ?5)");
     let mut prep4 = statement.clone();
-    prep4.push_str("VALUES (?1, ?2, ?3, ?4, ?5)");
+    prep4.push_str("VALUES (?1, ?2, ?3, ?4, ?5, ?6)");
 
     let conn = Connection::open("mtg.db")?;
 
     // Connection.prepare() accepts &str, build with column names first
     // prepare() also checks for number of fields and values to be the same.
     match values.len() {
-        2 => {
+        3 => {
             let mut stmt1 = conn.prepare(prep1.as_str())?;
             stmt1.execute(&values)?;
         },
-        3 => {
+        4 => {
             let mut stmt2 = conn.prepare(prep2.as_str())?;
             stmt2.execute(&values)?;
         },
-        4 => {
+        5 => {
             let mut stmt3 = conn.prepare(prep3.as_str())?;
             stmt3.execute(&values)?;
         },
-        5 => {
+        6 => {
             let mut stmt4 = conn.prepare(prep4.as_str())?;
             stmt4.execute(&values)?;
         },
@@ -250,19 +253,24 @@ pub fn insert_card(card: &Cards) -> Result<()> {
     Ok(())
 }
 
-pub fn select_cards() -> Result<Vec<String>> {
+pub fn select_cards() -> Result<Vec<(String, Vec<String>, String)>> {
     let conn = Connection::open("mtg.db")?;
     let mut stmt = conn.prepare(
-        "SELECT name FROM cards"
+        "SELECT name,color,rarity FROM cards"
     )?;
     let mut rows = stmt.query(NO_PARAMS)?;
 
-    let mut names = Vec::new();
+    let mut info: Vec<(String, Vec<String>, String)> = Vec::new();
     while let Some(row) = rows.next()? {
-        names.push(row.get(0)?);
+        // name, colors
+        let color: String = row.get(1)?;
+        let colors = color.split_whitespace()
+                                        .map(|slice| slice.to_string())
+                                        .collect();
+        info.push((row.get(0)?, colors, row.get(2)?));
     }
 
-    Ok(names)
+    Ok(info)
 }
 
 pub fn select_card_sets() -> Result<Vec<(i32, String)>> {

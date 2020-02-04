@@ -6,7 +6,7 @@ use rocket::http::{ Cookie, Cookies };
 use rocket_contrib::templates::Template;
 use rocket_contrib::serve::StaticFiles;
 use serde::Serialize;
-use std::collections::HashMap;
+// use std::collections::HashMap;
 
 mod sql;
 
@@ -15,7 +15,7 @@ struct Info {
     profile: String,
     users: Vec<String>,
     card_sets: Vec<(i32, String)>,
-    cards: Vec<String>,
+    cards: Vec<(String, Vec<String>, String)>,
     result: String,
 }
 
@@ -103,8 +103,21 @@ fn database(cookies: Cookies) -> Template {
     if let Some(c) = cookies.get("profile") {
         info.insert_profile(c.value().to_string());
     }
+
+    /*
     if let Ok(cards) = sql::select_cards() {
+        // Card name and colors
+        println!("{:?}", cards);
         info.cards = cards;
+    }
+    */
+
+    match sql::select_cards() {
+        Ok(cards) => {
+            println!("{:?}", cards);
+            info.cards = cards;
+        },
+        Err(e) => eprintln!("{}", e),
     }
     
     Template::render("database", &info)

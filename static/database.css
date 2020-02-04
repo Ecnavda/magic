@@ -1,0 +1,55 @@
+div.red, div.green,
+div.blue, div.black,
+div.white, div.colorless {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+
+div.red {
+    background: red;
+}
+
+div.green {
+    background: green;
+}
+
+div.blue {
+    background: blue;
+}
+
+div.black {
+    background: #444444;
+}
+
+div.white {
+    background: white;
+    border: 1px solid black;
+}
+
+div.colorless {
+    background: #888888;
+}
+
+span.common, span.uncommon,
+span.rare, span.mythic {
+    font-size: 28px;
+}
+
+span.uncommon, span.rare,
+span.mythic {
+    -webkit-text-stroke: 1px black;
+}
+
+span.uncommon {
+    color: gray;
+}
+
+span.rare {
+    color: yellow;
+}
+
+span.mythic {
+    color: orangered;
+}

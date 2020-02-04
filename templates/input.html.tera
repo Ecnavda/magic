@@ -17,24 +17,36 @@
                             {% endfor %}
                     </select>
                     
+                    <label>*Rarity: </label>
+                    <div id="rarity">
+                        <input id="common" type="radio" name="rarity" value="common" required/>
+                        <label for="common">Common</label>
+                        <input id="uncommon" type="radio" name="rarity" value="uncommon" required/>
+                        <label for="uncommon">Uncommon</label>
+                        <input id="rare" type="radio" name="rarity" value="rare" required/>
+                        <label for="rare">Rare</label>
+                        <input id="mythic" type="radio" name="rarity" value="mythic" required/>
+                        <label for="mythic">Mythic</label>
+                    </div>
+                    
                     <label for="card_number">Card Number: </label>
                     <input id="card_number" type="number" name="card_number"/>
-                    
+
                     <label for="colors">Color: </label>
                         <div id="colors">
                             <input id="red" type="checkbox" name="red" value="true"/>
-                            <label for="red">Red </label>
+                            <label for="red" style="color: red;">Red </label>
                             <input id="blue" type="checkbox" name="blue" value="true"/>
-                            <label for="blue">Blue </label>
+                            <label for="blue" style="color: blue;">Blue </label>
                             <input id="black" type="checkbox" name="black" value="true"/>
                             <label for="black">Black </label>
                             <br>
                             <input id="green" type="checkbox" name="green" value="true"/>
-                            <label for="green">Green </label>
+                            <label for="green" style="color: green;">Green </label>
                             <input id="white" type="checkbox" name="white" value="true"/>
                             <label for="white">White </label>
                             <input id="colorless" type="checkbox" name="colorless" value="true"/>
-                            <label for="colorless">Colorless </label>
+                            <label for="colorless" style="color: #888888;">Colorless </label>
                         </div>
                     
                     <label for="cmc">Converted Mana Cost: </label>
