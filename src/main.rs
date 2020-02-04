@@ -114,7 +114,6 @@ fn database(cookies: Cookies) -> Template {
 
     match sql::select_cards() {
         Ok(cards) => {
-            println!("{:?}", cards);
             info.cards = cards;
         },
         Err(e) => eprintln!("{}", e),
