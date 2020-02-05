@@ -2,8 +2,10 @@
 
 {% block main %}
     <link rel="stylesheet" href="/assets/input.css"/>
+
+    <div id="result"></div>
     {% if card_sets %}
-        <form id="card_form" method="POST" action="/receive_card">
+        <form id="card_form" method="POST" action="">
             <fieldset>
                 <legend>Card Input</legend>
                 <div class="container">
@@ -74,4 +76,7 @@
                 </div>
             </fieldset>
         </form>
+
+        <script src="/assets/input.js"></script>
+        
 {% endblock main %}
