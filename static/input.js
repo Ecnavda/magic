@@ -18,6 +18,7 @@ function sendCardForm() {
     if (!(form.card_set.value == "")) {
         fd.rarity = form.card_set.value;
     }
+    fd.rarity = form.rarity.value;
     if (!(form.card_number.value == "")) {
         fd.card_number = form.card_number.value;
     }
