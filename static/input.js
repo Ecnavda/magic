@@ -1,6 +1,14 @@
 function sendCardForm() {
     let form = document.getElementById("card_form");
+    let result = document.getElementsByClassName("result")[0];
     let fd = new Object();
+
+    if (result.classList.contains("success")) {
+        result.classList.remove("success");
+    }
+    if (result.classList.contains("failure")) {
+        result.classList.remove("failure");
+    }
 
     if (!(form.card_name.value == "")) {
         fd.name = form.name.value;
@@ -29,14 +37,20 @@ function sendCardForm() {
 
     let xhr = new XMLHttpRequest();
     xhr.addEventListener("load", function(event) {
-        alert(event.target.responseText);
-        document.getElementById("result").innerHTML = "Success - Card into DB";
-        document.getElementById("result").classList.add("success");
+        // alert(event.target.responseText);
+        form.reset();
+        result.innerHTML = "Success - Card into DB";
+        result.classList.add("success");
     });
-    xhr.addEventListener("error", function(event) {alert("Something went wrong");});
+    xhr.addEventListener("error", function(event) {
+        result.innerHTML = "Something went wrong";
+        result.classList.add("failure");
+    });
     xhr.open("POST", "/receive_card");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.send(data.toString());
+
+    form.name.focus();
 }
 
 document.getElementById("card_form").addEventListener("submit", function(event) {

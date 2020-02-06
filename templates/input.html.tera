@@ -3,7 +3,7 @@
 {% block main %}
     <link rel="stylesheet" href="/assets/input.css"/>
 
-    <div id="result"></div>
+    <div class="result"></div>
     {% if card_sets %}
         <form id="card_form" method="POST" action="">
             <fieldset>
