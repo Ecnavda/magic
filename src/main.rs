@@ -192,7 +192,7 @@ fn receive_user(user: Form<sql::Users>, cookies: Cookies) -> Template {
 }
 
 #[post("/receive_card_set", data = "<card_set>")]
-fn receive_card_set(card_set: Form<sql::CardSets>, cookies: Cookies) -> Template {
+fn receive_card_set(card_set: Form<sql::CardSets>, cookies: Cookies) -> Redirect {
     let cookie = cookies.get("profile");
     let mut info = Info::new();
     if let Some(c) = cookie {
@@ -207,7 +207,7 @@ fn receive_card_set(card_set: Form<sql::CardSets>, cookies: Cookies) -> Template
         },
     };
 
-    Template::render("receive", &info)
+    Redirect::to("/input")
 }
 
 #[post("/receive_card", data = "<card>")]
