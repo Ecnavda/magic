@@ -191,10 +191,10 @@ pub fn sql_insert(table: &str, name: &str) -> Result<()> {
 pub fn insert_user(user: &Users) -> Result<()> {
     let conn = Connection::open("mtg.db")?;
     let mut stmt1 = conn.prepare(
-        "INSERT INTO users (email) VALUES (?)"
+        "INSERT INTO users (user_id) VALUES (?)"
     )?;
     let mut stmt2 = conn.prepare(
-        "INSERT INTO users (email, name) VALUES (?1, ?2)"
+        "INSERT INTO users (user_id, name) VALUES (?1, ?2)"
     )?;
     match &user.name {
         Some(x) => {
@@ -316,7 +316,7 @@ pub fn select_card_sets() -> Result<Vec<(i32, String)>> {
 pub fn select_users() -> Result<Vec<String>> {
     let conn = Connection::open("mtg.db")?;
     let mut stmt = conn.prepare(
-        "SELECT email FROM users"
+        "SELECT user_id FROM users"
     )?;
     let mut rows = stmt.query(NO_PARAMS)?;
 
