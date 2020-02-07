@@ -1,0 +1,6 @@
+{% extends "layout" %}
+
+{% block main %}
+    <h1>Your Decks</h1>
+    <p>Work in progress. Placeholder text</p>
+{% endblock %}

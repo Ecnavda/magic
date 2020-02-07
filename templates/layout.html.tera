@@ -14,7 +14,8 @@
                 {% if profile %}
                     <a href="/user">User</a>
                     <a href="/input">Input</a>
-                    <a href="/database">Database</a>
+                    <a href="/database">All Cards</a>
+                    <a href="/decks">Decks</a>
                     <a href="/logout">Logout</a>
                 {% endif %}
             </nav>

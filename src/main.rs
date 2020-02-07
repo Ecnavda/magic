@@ -63,6 +63,7 @@ fn start_webserver() -> rocket::Rocket {
                 index, input, user, receive_card,
                 receive_card_set, receive_user,
                 set_profile, logout, database,
+                decks,
                 ]
             )
         // This mount is for serving CSS, images, JS, etc.
@@ -233,4 +234,15 @@ fn receive_card(card: Form<sql::Cards>, cookies: Cookies) -> Template {
 fn set_profile(profile: Form<Profile>, mut cookies: Cookies) -> Redirect {
     cookies.add(Cookie::new("profile", profile.profile.clone()));
     Redirect::to("/")
+}
+
+#[get("/decks")]
+fn decks(cookies: Cookies) -> Template {
+    let cookie = cookies.get("profile");
+    let mut info = Info::new();
+    if let Some(c) = cookie {
+        info.insert_profile(c.value().to_string());
+    }
+
+    Template::render("decks", &info)
 }
