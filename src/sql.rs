@@ -101,9 +101,9 @@ pub fn create_schema() -> Result<()> {
     // and disabling the rowid column for this table.
     conn.execute(
         "CREATE TABLE IF NOT EXISTS users (
-            email   TEXT NOT NULL,
-            name    TEXT,
-            PRIMARY KEY(email)
+            user_id     TEXT    NOT NULL,
+            name        TEXT,
+            PRIMARY KEY(user_id)
         ) WITHOUT ROWID",
         NO_PARAMS,
     )?;
@@ -113,10 +113,10 @@ pub fn create_schema() -> Result<()> {
     // INTEGER Primary key gets AUTOINCREMENT by default.
     conn.execute(
         "CREATE TABLE IF NOT EXISTS card_sets (
-            id         INTEGER NOT NULL, 
-            name       TEXT NOT NULL,
-            release    TEXT NOT NULL,
-            PRIMARY KEY(id)
+            card_set_id INTEGER NOT NULL, 
+            name        TEXT    NOT NULL,
+            release     TEXT    NOT NULL,
+            PRIMARY KEY(card_set_id)
         )",
         NO_PARAMS,
     )?;
@@ -124,25 +124,51 @@ pub fn create_schema() -> Result<()> {
     // Consider UNIQUE on card_set and card_number
     conn.execute(
         "CREATE TABLE IF NOT EXISTS cards (
-            name        TEXT NOT NULL,
-            card_set    INT NOT NULL,
-            rarity      TEXT,
+            card_id     INT     NOT NULL,
+            name        TEXT    NOT NULL,
+            card_set_id INT     NOT NULL,
+            rarity      TEXT    NOT NULL,
             card_number INT,
             color       TEXT,
             cmc         INT,
-            FOREIGN KEY(card_set) REFERENCES card_sets(id)
+            PRIMARY KEY(card_id),
+            FOREIGN KEY(card_set_id) REFERENCES card_sets(card_set_id)
         )",
         NO_PARAMS,
     )?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS inventory (
-            email    TEXT NOT NULL,
-            card    TEXT NOT NULL,
-            FOREIGN KEY(email) REFERENCES users(email),
-            FOREIGN KEY(card) REFERENCES cards(rowid)
+            inv_id  INT     NOT NULL,
+            user_id TEXT    NOT NULL,
+            card_id INTEGER NOT NULL,
+            PRIMARY KEY(inv_id),
+            FOREIGN KEY(user_id) REFERENCES users(user_id),
+            FOREIGN KEY(card_id) REFERENCES cards(card_id)
         )",
         NO_PARAMS,
+    )?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS deck_sets (
+            deck_set_id INT     NOT NULL,
+            name        TEXT    NOT NULL,
+            user_id     TEXT    NOT NULL,
+            PRIMARY KEY(deck_set_id)
+        )",
+        NO_PARAMS
+    )?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS decks (
+            deck_id     INT     NOT NULL,
+            deck_set_id INT     NOT NULL,
+            card_id     INT     NOT NULL,
+            PRIMARY KEY(deck_id),
+            FOREIGN KEY(deck_set_id) REFERENCES deck_sets(deck_set_id),
+            FOREIGN KEY(card_id) REFERENCES cards(card_id)
+        )",
+        NO_PARAMS
     )?;
 
     Ok(())
